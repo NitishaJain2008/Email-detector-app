@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Guard - Spam & Duplicate Detector</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <!-- Google Fonts for crisp typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-wrapper">
+        <!-- Top Navigation Bar -->
+        <header class="navbar">
+            <div class="nav-container">
+                <div class="brand">
+                    <div class="brand-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                            <polyline points="22,6 12,13 2,6"></polyline>
+                        </svg>
+                    </div>
+                    <div class="brand-text">
+                        <span class="brand-title">EmailGuard</span>
+                        <span class="brand-subtitle">Spam & Duplicate Detector</span>
+                    </div>
+                </div>
+
+                <div class="nav-status">
+                    <span class="status-indicator"></span>
+                    <span id="model-status-text">AI Model: Ready</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="main-container">
+            <!-- Navigation Tabs -->
+            <nav class="tabs-nav">
+                <button class="tab-btn active" data-tab="tab-spam">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                        <line x1="12" y1="9" x2="12" y2="13"></line>
+                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                    </svg>
+                    Spam & Phishing Detector
+                </button>
+                <button class="tab-btn" data-tab="tab-similarity">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                    </svg>
+                    Duplicate / "Same" Detector
+                </button>
+                <button class="tab-btn" data-tab="tab-library">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                    </svg>
+                    Library Matcher
+                </button>
+                <button class="tab-btn" data-tab="tab-batch">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="8" y1="6" x2="21" y2="6"></line>
+                        <line x1="8" y1="12" x2="21" y2="12"></line>
+                        <line x1="8" y1="18" x2="21" y2="18"></line>
+                        <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                        <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                        <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                    </svg>
+                    Batch Scanner
+                </button>
+            </nav>
+
+            <!-- TAB 1: SPAM & PHISHING DETECTOR -->
+            <section id="tab-spam" class="tab-pane active">
+                <div class="panel-header">
+                    <h2>Email Spam & Phishing Detection</h2>
+                    <p>Detect whether an incoming email is unwanted spam, malicious phishing, or safe communication using NLP & Machine Learning.</p>
+                </div>
+
+                <!-- Quick Samples Bar -->
+                <div class="samples-bar">
+                    <span class="samples-label">Try quick samples:</span>
+                    <button class="sample-pill" onclick="loadSpamSample(0)">🚨 Phishing Alert</button>
+                    <button class="sample-pill" onclick="loadSpamSample(1)">💰 Lottery Scam</button>
+                    <button class="sample-pill" onclick="loadSpamSample(2)">📈 Crypto Spam</button>
+                    <button class="sample-pill safe" onclick="loadHamSample(0)">💼 Team Sprint Sync</button>
+                    <button class="sample-pill safe" onclick="loadHamSample(1)">☕ Friend's Lunch</button>
+                    <button class="sample-pill safe" onclick="loadHamSample(2)">📦 Amazon Delivery</button>
+                </div>
+
+                <div class="grid-layout">
+                    <!-- Input Card -->
+                    <div class="card form-card">
+                        <div class="card-header">
+                            <h3>Email Content</h3>
+                            <button class="btn-clear" onclick="clearSpamForm()">Clear</button>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label for="spam-subject">Email Subject</label>
+                                <input type="text" id="spam-subject" placeholder="e.g. URGENT: Action required on your account" autocomplete="off">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="spam-body">Email Body / Message Text *</label>
+                                <textarea id="spam-body" rows="9" placeholder="Paste full email text here..."></textarea>
+                            </div>
+
+                            <button id="btn-detect-spam" class="btn btn-primary btn-block" onclick="analyzeSpam()">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="11" cy="11" r="8"></circle>
+                                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                </svg>
+                                <span>Analyze Email Security</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Result Card -->
+                    <div class="card result-card" id="spam-result-card">
+                        <div class="card-header">
+                            <h3>Analysis Verdict</h3>
+                            <span id="verdict-badge" class="badge badge-neutral">Awaiting Input</span>
+                        </div>
+                        <div class="card-body">
+                            <div id="spam-empty-state" class="empty-state">
+                                <div class="empty-icon">✉️</div>
+                                <p>Enter an email or select a sample above to view detailed spam probability, trigger terms, and risk score.</p>
+                            </div>
+
+                            <div id="spam-result-content" class="result-details hidden">
+                                <!-- Gauge & Score Overview -->
+                                <div class="score-overview">
+                                    <div class="risk-circle" id="risk-circle">
+                                        <div class="circle-inner">
+                                            <span class="score-number" id="risk-score">0%</span>
+                                            <span class="score-label">Spam Prob.</span>
+                                        </div>
+                                    </div>
+                                    <div class="score-metrics">
+                                        <div class="metric-row">
+                                            <span class="metric-name">Classification:</span>
+                                            <strong id="metric-label" class="metric-val">-</strong>
+                                        </div>
+                                        <div class="metric-row">
+                                            <span class="metric-name">Risk Level:</span>
+                                            <strong id="metric-risk" class="metric-val">-</strong>
+                                        </div>
+                                        <div class="metric-row">
+                                            <span class="metric-name">Confidence:</span>
+                                            <strong id="metric-confidence" class="metric-val">-</strong>
+                                        </div>
+                                        <div class="metric-row">
+                                            <span class="metric-name">Ham (Safe) Probability:</span>
+                                            <strong id="metric-ham-prob" class="metric-val">-</strong>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Explanation Box -->
+                                <div class="explanation-box" id="explanation-box">
+                                    <p id="explanation-text"></p>
+                                </div>
+
+                                <!-- Trigger Words Found -->
+                                <div class="triggers-section" id="triggers-section">
+                                    <h4>Detected Spam Trigger Keywords</h4>
+                                    <div class="triggers-list" id="triggers-list"></div>
+                                </div>
+
+                                <!-- Heuristic Warnings -->
+                                <div class="heuristics-section" id="heuristics-section">
+                                    <h4>Security Heuristics Detected</h4>
+                                    <ul id="heuristics-list" class="heuristics-list"></ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 2: DUPLICATE / "SAME" DETECTOR -->
+            <section id="tab-similarity" class="tab-pane">
+                <div class="panel-header">
+                    <h2>Duplicate & "Same Email" Detector</h2>
+                    <p>Compare two emails side-by-side to check if they are identical clones, paraphrased duplicates, or distinct messages.</p>
+                </div>
+
+                <!-- Quick Pairs Bar -->
+                <div class="samples-bar">
+                    <span class="samples-label">Load comparison pair:</span>
+                    <button class="sample-pill" onclick="loadSimilarityPair(0)">⚡ Near Duplicate (Paraphrased)</button>
+                    <button class="sample-pill" onclick="loadSimilarityPair(1)">🎯 100% Exact Identical</button>
+                    <button class="sample-pill safe" onclick="loadSimilarityPair(2)">🔄 Completely Different</button>
+                </div>
+
+                <!-- Side-by-Side Comparator Inputs -->
+                <div class="compare-inputs-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Email Document A</h3>
+                            <button class="btn-clear" onclick="document.getElementById('compare-email-1').value=''">Clear</button>
+                        </div>
+                        <div class="card-body">
+                            <textarea id="compare-email-1" rows="7" placeholder="Paste the first email text here..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Email Document B</h3>
+                            <button class="btn-clear" onclick="document.getElementById('compare-email-2').value=''">Clear</button>
+                        </div>
+                        <div class="card-body">
+                            <textarea id="compare-email-2" rows="7" placeholder="Paste the second email text here to compare..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="action-bar">
+                    <button id="btn-compare" class="btn btn-primary" onclick="compareEmails()">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="16 3 21 3 21 8"></polyline>
+                            <line x1="4" y1="20" x2="21" y2="3"></line>
+                            <polyline points="21 16 21 21 16 21"></polyline>
+                            <line x1="15" y1="15" x2="21" y2="21"></line>
+                            <line x1="4" y1="4" x2="9" y2="9"></line>
+                        </svg>
+                        <span>Calculate Similarity & Detect Same Email</span>
+                    </button>
+                </div>
+
+                <!-- Similarity Result Card -->
+                <div class="card result-card mt-4" id="similarity-result-card">
+                    <div class="card-header">
+                        <h3>Similarity & Duplicate Verdict</h3>
+                        <span id="same-verdict-badge" class="badge badge-neutral">Awaiting Comparison</span>
+                    </div>
+                    <div class="card-body">
+                        <div id="sim-empty-state" class="empty-state">
+                            <div class="empty-icon">⚖️</div>
+                            <p>Fill both email boxes and click Compare to calculate similarity percentage, word overlap, and duplicate classification.</p>
+                        </div>
+
+                        <div id="sim-result-content" class="hidden">
+                            <!-- Large Match Meter -->
+                            <div class="similarity-meter-wrap">
+                                <div class="meter-header">
+                                    <span class="meter-title">Match Level</span>
+                                    <span class="meter-percentage" id="meter-percentage">0%</span>
+                                </div>
+                                <div class="meter-bar-bg">
+                                    <div class="meter-bar-fill" id="meter-bar-fill" style="width: 0%"></div>
+                                </div>
+                                <div class="meter-match-type" id="meter-match-type">-</div>
+                            </div>
+
+                            <p class="sim-summary" id="sim-summary"></p>
+
+                            <!-- Breakdown Metrics Grid -->
+                            <div class="metrics-grid">
+                                <div class="metric-card">
+                                    <span class="metric-title">Cosine Similarity</span>
+                                    <span class="metric-value" id="val-cosine">0.00</span>
+                                    <span class="metric-desc">Semantic vector alignment</span>
+                                </div>
+                                <div class="metric-card">
+                                    <span class="metric-title">Jaccard Overlap</span>
+                                    <span class="metric-value" id="val-jaccard">0.00</span>
+                                    <span class="metric-desc">Unique word token intersection</span>
+                                </div>
+                                <div class="metric-card">
+                                    <span class="metric-title">Sequence Alignment</span>
+                                    <span class="metric-value" id="val-sequence">0.00</span>
+                                    <span class="metric-desc">Character order & phrasing match</span>
+                                </div>
+                                <div class="metric-card">
+                                    <span class="metric-title">Is Duplicate / Same?</span>
+                                    <span class="metric-value" id="val-is-same">-</span>
+                                    <span class="metric-desc">Threshold ≥ 80% match</span>
+                                </div>
+                            </div>
+
+                            <!-- Shared Words -->
+                            <div class="tokens-section mt-4">
+                                <h4>Shared Key Vocabulary</h4>
+                                <div class="token-chips" id="matching-tokens-list"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 3: LIBRARY MATCHER -->
+            <section id="tab-library" class="tab-pane">
+                <div class="panel-header">
+                    <h2>Email Database Duplicate Matcher</h2>
+                    <p>Check an incoming email against your library of stored templates/emails to immediately detect if it is an existing or duplicate record.</p>
+                </div>
+
+                <div class="grid-layout">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Test Email for Duplicate Check</h3>
+                        </div>
+                        <div class="card-body">
+                            <textarea id="library-test-input" rows="8" placeholder="Paste the email you want to test against the library..."></textarea>
+                            <div class="mt-3">
+                                <button class="btn btn-primary btn-block" onclick="checkAgainstLibrary()">
+                                    Scan Database for Duplicates
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Preloaded Stored Email Library</h3>
+                            <span class="badge badge-info">4 Stored Records</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="library-list" id="library-preview-list">
+                                <div class="lib-item">
+                                    <strong>LIB-001:</strong> Quarterly Performance Review Schedule
+                                </div>
+                                <div class="lib-item">
+                                    <strong>LIB-002:</strong> System Maintenance Downtime Notice
+                                </div>
+                                <div class="lib-item">
+                                    <strong>LIB-003:</strong> Security Warning: Suspicious Login Detected
+                                </div>
+                                <div class="lib-item">
+                                    <strong>LIB-004:</strong> Invoice #49281 Settlement Confirmation
+                                </div>
+                            </div>
+                            <div class="quick-lib-testers mt-3">
+                                <span class="samples-label">Test a duplicate:</span>
+                                <button class="sample-pill" onclick="loadLibraryTest(1)">Test Maintenance Duplicate</button>
+                                <button class="sample-pill" onclick="loadLibraryTest(3)">Test Security Alert Duplicate</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Library Results -->
+                <div class="card mt-4" id="library-result-card">
+                    <div class="card-header">
+                        <h3>Database Match Results</h3>
+                        <span id="lib-verdict-badge" class="badge badge-neutral">Awaiting Scan</span>
+                    </div>
+                    <div class="card-body">
+                        <div id="lib-empty-state" class="empty-state">
+                            <div class="empty-icon">📁</div>
+                            <p>Click "Scan Database for Duplicates" to see ranked matching percentages against all stored records.</p>
+                        </div>
+                        <div id="lib-results-table-wrap" class="hidden">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Record ID</th>
+                                        <th>Subject</th>
+                                        <th>Similarity Score</th>
+                                        <th>Match Classification</th>
+                                        <th>Duplicate Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="lib-results-tbody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 4: BATCH SCANNER -->
+            <section id="tab-batch" class="tab-pane">
+                <div class="panel-header">
+                    <h2>Batch Email Security & Duplicate Scanner</h2>
+                    <p>Process multiple emails in a single automated scan. Paste several emails separated by <code>---</code>.</p>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Bulk Email Input</h3>
+                        <button class="sample-pill" onclick="loadBatchSample()">Load Batch Demo</button>
+                    </div>
+                    <div class="card-body">
+                        <textarea id="batch-input" rows="8" placeholder="Email 1 text here...&#10;---&#10;Email 2 text here...&#10;---&#10;Email 3 text here..."></textarea>
+                        <div class="mt-3">
+                            <button class="btn btn-primary" onclick="runBatchScan()">Execute Batch Scan</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h3>Batch Results</h3>
+                        <span id="batch-count-badge" class="badge badge-neutral">0 Emails</span>
+                    </div>
+                    <div class="card-body">
+                        <div id="batch-empty-state" class="empty-state">
+                            <div class="empty-icon">📊</div>
+                            <p>Batch results will appear here in a structured summary table.</p>
+                        </div>
+                        <div id="batch-results-wrap" class="hidden">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Classification</th>
+                                        <th>Spam Probability</th>
+                                        <th>Risk Level</th>
+                                        <th>Top Triggers</th>
+                                        <th>Explanation</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="batch-results-tbody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            <div class="footer-container">
+                <p>EmailGuard &copy; 2026 &bull; Dual-Engine Spam & Duplicate Detector &bull; Built with Python, Flask & Scikit-learn</p>
+                <div class="footer-links">
+                    <a href="/api/health" target="_blank">API Health Status</a>
+                    <span class="sep">&bull;</span>
+                    <a href="javascript:void(0)" onclick="alert('REST API Endpoints:\n\nPOST /api/detect-spam\nPOST /api/check-similarity\nPOST /api/check-library\nPOST /api/batch-detect\nGET /api/health')">REST API Docs</a>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Scripts -->
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
